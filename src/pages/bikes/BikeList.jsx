@@ -22,15 +22,17 @@ import {
   FaShieldAlt
 } from 'react-icons/fa';
 
-// Modern SearchInput with enhanced UX
+// Clean SearchInput component
 const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }) => {
   const [inputValue, setInputValue] = useState(initialValue || '');
   const inputRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  // Sync with external value changes
+  // Sync with external value changes only when it's different
   useEffect(() => {
-    setInputValue(initialValue || '');
+    if (initialValue !== inputValue) {
+      setInputValue(initialValue || '');
+    }
   }, [initialValue]);
 
   // Cleanup timeout on unmount
@@ -43,28 +45,27 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
   }, []);
 
   const debouncedSearch = useCallback((value) => {
-    // Clear previous timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
-    // Set new timeout
     timeoutRef.current = setTimeout(() => {
+      console.log('🔍 Search triggered:', value);
       onSearch(value);
     }, 300);
   }, [onSearch]);
 
   const handleChange = (e) => {
     const value = e.target.value;
+    console.log('🔍 Input changed:', value);
     setInputValue(value);
     debouncedSearch(value);
   };
 
   const handleClear = () => {
-    // Clear timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    console.log('🔍 Search cleared');
     setInputValue('');
     onSearch('');
     inputRef.current?.focus();
@@ -95,7 +96,7 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
   );
 };
 
-// Modern Filter component with icons and better UX
+// Clean Filter component
 const FilterSection = ({ typeFilter, statusFilter, sortBy, onFilterChange, onClearFilters, hasActiveFilters }) => {
   const bikeTypes = [
     { value: "", label: "All Types", icon: <FaBicycle className="w-4 h-4" /> },
@@ -125,86 +126,84 @@ const FilterSection = ({ typeFilter, statusFilter, sortBy, onFilterChange, onCle
   ];
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-8 animate-fade-in">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
-            <FaFilter className="w-6 h-6 text-blue-600" />
-            Filters & Sort
-          </h3>
+        <div className="flex items-center space-x-2">
+          <FaFilter className="text-blue-600 text-xl" />
+          <h3 className="text-xl font-bold text-gray-800">Filters</h3>
         </div>
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-all duration-300 flex items-center gap-2 hover:scale-105"
+            className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300"
           >
             <FaTimes className="w-4 h-4" />
-            Clear All
+            <span>Clear All</span>
           </button>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Type Filter */}
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Bike Type</label>
-          <div className="relative">
-            <select
-              value={typeFilter}
-              onChange={(e) => onFilterChange('type', e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 appearance-none bg-white/80 backdrop-blur-sm"
-            >
-              {bikeTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <FaSort className="w-4 h-4 text-gray-400" />
-            </div>
+        {/* Bike Type Filter */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Bike Type</label>
+          <div className="space-y-2">
+            {bikeTypes.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => onFilterChange('type', type.value)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                  typeFilter === type.value
+                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
+                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {type.icon}
+                <span className="font-medium">{type.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Status Filter */}
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Status</label>
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => onFilterChange('status', e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 appearance-none bg-white/80 backdrop-blur-sm"
-            >
-              {statusOptions.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <FaSort className="w-4 h-4 text-gray-400" />
-            </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Status</label>
+          <div className="space-y-2">
+            {statusOptions.map((status) => (
+              <button
+                key={status.value}
+                onClick={() => onFilterChange('status', status.value)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                  statusFilter === status.value
+                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
+                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {status.icon}
+                <span className="font-medium">{status.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Sort */}
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Sort By</label>
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => onFilterChange('sort', e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 appearance-none bg-white/80 backdrop-blur-sm"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <FaSort className="w-4 h-4 text-gray-400" />
-            </div>
+        {/* Sort Options */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Sort By</label>
+          <div className="space-y-2">
+            {sortOptions.map((sort) => (
+              <button
+                key={sort.value}
+                onClick={() => onFilterChange('sort', sort.value)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                  sortBy === sort.value
+                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
+                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <FaSort className="w-4 h-4" />
+                <span className="font-medium">{sort.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -212,7 +211,7 @@ const FilterSection = ({ typeFilter, statusFilter, sortBy, onFilterChange, onCle
   );
 };
 
-// Enhanced Pagination with better UX
+// Clean Pagination component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const getVisiblePages = () => {
     const delta = 2;
@@ -243,11 +242,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-3 mt-12">
+    <div className="flex justify-center items-center space-x-2 mt-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
       >
         Previous
       </button>
@@ -257,12 +256,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           key={index}
           onClick={() => typeof page === 'number' && onPageChange(page)}
           disabled={page === '...'}
-          className={`px-4 py-3 rounded-xl border-2 transition-all duration-300 font-medium ${
+          className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
             page === currentPage
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 shadow-lg'
+              ? 'bg-blue-600 text-white'
               : page === '...'
-              ? 'border-gray-200 text-gray-500 cursor-default'
-              : 'border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+              ? 'text-gray-400 cursor-default'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
           {page}
@@ -272,7 +271,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium"
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
       >
         Next
       </button>
@@ -280,6 +279,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
+// Main BikeList component with guaranteed functionality
 const BikeList = () => {
   const { bikes: contextBikes, fetchBikes, loading: contextLoading } = useBike();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -293,6 +293,7 @@ const BikeList = () => {
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || '');
   const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || '');
 
+  // Clean fetchData function
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -318,7 +319,7 @@ const BikeList = () => {
     }
   };
 
-  // Sync URL parameters with state
+  // Initialize from URL on mount
   useEffect(() => {
     const search = searchParams.get('search') || '';
     const type = searchParams.get('type') || '';
@@ -326,12 +327,12 @@ const BikeList = () => {
     const sort = searchParams.get('sort') || '';
     const page = parseInt(searchParams.get('page') || '1');
 
-    if (search !== searchTerm) setSearchTerm(search);
-    if (type !== typeFilter) setTypeFilter(type);
-    if (status !== statusFilter) setStatusFilter(status);
-    if (sort !== sortBy) setSortBy(sort);
-    if (page !== currentPage) setCurrentPage(page);
-  }, [searchParams, searchTerm, typeFilter, statusFilter, sortBy, currentPage]);
+    setSearchTerm(search);
+    setTypeFilter(type);
+    setStatusFilter(status);
+    setSortBy(sort);
+    setCurrentPage(page);
+  }, []); // Only run on mount
 
   // Update URL when filters change
   useEffect(() => {
@@ -345,128 +346,20 @@ const BikeList = () => {
     setSearchParams(params);
   }, [searchTerm, typeFilter, statusFilter, sortBy, currentPage, setSearchParams]);
 
+  // Fetch data when filters change
   useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo(0, 0);
-    
-    // Refresh bikes when component mounts to get latest status
-    if (!searchTerm && !typeFilter && !statusFilter && !sortBy && currentPage === 1) {
-      fetchBikes();
-    }
-    
-    // Refresh when user returns to the tab
-    const handleFocus = () => {
-      if (!searchTerm && !typeFilter && !statusFilter && !sortBy && currentPage === 1) {
-        fetchBikes();
-      }
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [fetchBikes, searchTerm, typeFilter, statusFilter, sortBy, currentPage]);
+    console.log('🔄 Filters changed - fetching data:', { searchTerm, typeFilter, statusFilter, sortBy, currentPage });
+    fetchData();
+  }, [searchTerm, typeFilter, statusFilter, sortBy, currentPage]);
 
-  // Use context bikes for real-time updates when no filters are applied
-  useEffect(() => {
-    if (!searchTerm && !typeFilter && !statusFilter && !sortBy && currentPage === 1) {
-      // Use context bikes for real-time updates
-      setBikes(contextBikes);
-      setLoading(contextLoading);
-      setTotalPages(Math.ceil((contextBikes.length) / 12));
-    }
-  }, [contextBikes, contextLoading, searchTerm, typeFilter, statusFilter, sortBy, currentPage]);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchDataSafely = async () => {
-      try {
-        setLoading(true);
-        
-        // Create cache key based on filters
-        const cacheKey = `${CACHE_KEYS.BIKES}_${searchTerm}_${typeFilter}_${statusFilter}_${sortBy}_${currentPage}`;
-        
-        // Check cache first
-        const cachedData = apiCache.get(cacheKey);
-        if (cachedData && !searchTerm && !typeFilter && !statusFilter) {
-          if (isMounted) {
-            setBikes(cachedData.results || cachedData);
-            setTotalPages(Math.ceil((cachedData.count || cachedData.length) / 12));
-            setError('');
-            setLoading(false);
-          }
-          return;
-        }
-        
-        const params = new URLSearchParams();
-        if (searchTerm) params.append('search', searchTerm);
-        if (typeFilter) params.append('bike_type', typeFilter);
-        if (statusFilter) params.append('status', statusFilter);
-        if (sortBy) params.append('ordering', sortBy);
-        params.append('page', currentPage);
-
-        const response = await api.get(`bikes/?${params.toString()}`);
-        
-        if (isMounted) {
-          setBikes(response.data.results || response.data);
-          setTotalPages(Math.ceil((response.data.count || response.data.length) / 12));
-          setError('');
-          
-          // Cache the response if no filters applied
-          if (!searchTerm && !typeFilter && !statusFilter) {
-            apiCache.set(cacheKey, response.data);
-          }
-        }
-      } catch (error) {
-        if (isMounted) {
-          setError('Failed to load bikes. Please try again later.');
-          console.error('Error fetching bikes:', error);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchDataSafely();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentPage, searchTerm, typeFilter, statusFilter, sortBy]);
-
-  // Sync URL params with state
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (searchTerm) params.set('search', searchTerm);
-    if (typeFilter) params.set('type', typeFilter);
-    if (statusFilter) params.set('status', statusFilter);
-    if (sortBy) params.set('sort', sortBy);
-    setSearchParams(params);
-  }, [searchTerm, typeFilter, statusFilter, sortBy, setSearchParams]);
-
-  // Sync state with URL params when they change externally
-  useEffect(() => {
-    const urlSearch = searchParams.get('search') || '';
-    const urlType = searchParams.get('type') || '';
-    const urlStatus = searchParams.get('status') || '';
-    const urlSort = searchParams.get('sort') || '';
-    
-    if (urlSearch !== searchTerm) setSearchTerm(urlSearch);
-    if (urlType !== typeFilter) setTypeFilter(urlType);
-    if (urlStatus !== statusFilter) setStatusFilter(urlStatus);
-    if (urlSort !== sortBy) setSortBy(urlSort);
-  }, [searchParams, searchTerm, typeFilter, statusFilter, sortBy]);
-
+  // Handle search
   const handleSearch = (value) => {
     console.log('🔍 Search term changed:', value);
     setSearchTerm(value);
     setCurrentPage(1);
   };
 
+  // Handle filter changes
   const handleFilterChange = (filterType, value) => {
     console.log('🎛️ Filter changed:', filterType, value);
     switch (filterType) {
@@ -485,12 +378,20 @@ const BikeList = () => {
     setCurrentPage(1);
   };
 
+  // Handle clear filters
   const handleClearFilters = () => {
+    console.log('🧹 Clearing all filters');
     setSearchTerm('');
     setTypeFilter('');
     setStatusFilter('');
     setSortBy('');
     setCurrentPage(1);
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    console.log('📄 Page changed:', page);
+    setCurrentPage(page);
   };
 
   const hasActiveFilters = searchTerm || typeFilter || statusFilter || sortBy;
@@ -552,7 +453,6 @@ const BikeList = () => {
           {/* Enhanced Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
             <SearchInput 
-              key={searchTerm} // Force re-render when search term changes
               initialValue={searchTerm}
               onSearch={handleSearch}
               placeholder="Search by name, brand, type, or features..."
@@ -570,44 +470,56 @@ const BikeList = () => {
           hasActiveFilters={hasActiveFilters}
         />
 
-        {/* Enhanced Bike Grid */}
-        {bikes.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-8xl mb-6 animate-float">🚲</div>
-            <h3 className="text-3xl font-bold text-gray-800 mb-4">No Bikes Found</h3>
-            <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto">
-              Try adjusting your search criteria or filters to find what you're looking for.
-            </p>
-            <button
-              onClick={handleClearFilters}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              Clear All Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {bikes.map((bike, index) => (
-              <div
-                key={bike.id}
-                className="animate-scale-in transform transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-2xl"
-                style={{ 
-                  animationDelay: `${index * 0.1}s`,
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
+        {/* Results Section */}
+        <div className="mt-12">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading results...</p>
+            </div>
+          ) : bikes.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">No bikes found</h3>
+              <p className="text-gray-600 mb-6">Try adjusting your search or filters</p>
+              <button
+                onClick={handleClearFilters}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300"
               >
-                <BikeCard bike={bike} />
+                Clear All Filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {bikes.length} {bikes.length === 1 ? 'Bike' : 'Bikes'} Found
+                </h2>
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-300"
+                  >
+                    <FaTimes className="w-4 h-4" />
+                    <span>Clear Filters</span>
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-        )}
 
-        {/* Enhanced Pagination */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {bikes.map((bike) => (
+                  <BikeCard key={bike.id} bike={bike} />
+                ))}
+              </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

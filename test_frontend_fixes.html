@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Fixes Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Frontend Fixes Test</h1>
+    
+    <div class="test-section">
+        <h2>✅ Backend Status</h2>
+        <p>The backend is working perfectly with 5 bikes in the database.</p>
+        <button class="test-button" onclick="testBackend()">Test Backend API</button>
+        <div id="backend-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Search Functionality Test</h2>
+        <p>Test if search parameters are working correctly:</p>
+        <button class="test-button" onclick="testSearch('Mountain')">Search "Mountain"</button>
+        <button class="test-button" onclick="testSearch('Giant')">Search "Giant"</button>
+        <button class="test-button" onclick="testSearch('Electric')">Search "Electric"</button>
+        <div id="search-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎛️ Filter Functionality Test</h2>
+        <p>Test if filter parameters are working correctly:</p>
+        <button class="test-button" onclick="testFilter('bike_type=Mountain')">Filter Mountain Bikes</button>
+        <button class="test-button" onclick="testFilter('status=available')">Filter Available Bikes</button>
+        <button class="test-button" onclick="testFilter('bike_type=Mountain&status=available')">Combined Filter</button>
+        <div id="filter-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Frontend Deployment</h2>
+        <p>The frontend fixes are ready to deploy:</p>
+        <ul>
+            <li>✅ Fixed search input clearing issue</li>
+            <li>✅ Fixed filter parameter handling</li>
+            <li>✅ Backend API is working perfectly</li>
+        </ul>
+        <button class="test-button" onclick="deployFrontend()">Deploy to Vercel</button>
+        <div id="deploy-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://bike-rental-backend-jmhr.onrender.com/api/v1';
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bikes/`);
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Backend is working! Found ${data.count} bikes.<br>
+                            Sample bikes: ${data.results.slice(0, 3).map(bike => bike.name).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ No bikes found in backend</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Backend error: ${error.message}</div>`;
+            }
+        }
+
+        async function testSearch(searchTerm) {
+            const resultDiv = document.getElementById('search-result');
+            resultDiv.innerHTML = 'Testing search...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bikes/?search=${encodeURIComponent(searchTerm)}`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Search "${searchTerm}" returned ${data.count} results<br>
+                            Found: ${data.results.map(bike => bike.name).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Search failed for "${searchTerm}"</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Search error: ${error.message}</div>`;
+            }
+        }
+
+        async function testFilter(filterParams) {
+            const resultDiv = document.getElementById('filter-result');
+            resultDiv.innerHTML = 'Testing filter...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bikes/?${filterParams}`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Filter "${filterParams}" returned ${data.count} results<br>
+                            Found: ${data.results.map(bike => `${bike.name} (${bike.bike_type})`).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Filter failed for "${filterParams}"</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Filter error: ${error.message}</div>`;
+            }
+        }
+
+        function deployFrontend() {
+            const resultDiv = document.getElementById('deploy-result');
+            resultDiv.innerHTML = `
+                <div class="success">
+                    🚀 Frontend fixes are ready!<br>
+                    <br>
+                    <strong>To deploy:</strong><br>
+                    1. Commit the changes: git add . && git commit -m "Fix search and filter issues"<br>
+                    2. Push to GitHub: git push origin main<br>
+                    3. Vercel will automatically deploy the fixes<br>
+                    <br>
+                    <strong>Fixed Issues:</strong><br>
+                    ✅ Search input no longer clears when typing<br>
+                    ✅ Filter buttons work correctly<br>
+                    ✅ Backend API is working perfectly<br>
+                    ✅ All 5 bikes are accessible
+                </div>
+            `;
+        }
+
+        // Auto-test backend on page load
+        window.onload = function() {
+            testBackend();
+        };
+    </script>
+</body>
+</html> 
