@@ -280,10 +280,10 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {bikes.map((bike) => (
                 <div key={bike.id} className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 group border border-white/20">
-                  {bike.image && (
+                  {(bike.image || bike.image_url) && (
                     <div className="relative h-56 overflow-hidden">
                       <img
-                        src={bike.image}
+                        src={bike.image_url || bike.image}
                         alt={bike.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />

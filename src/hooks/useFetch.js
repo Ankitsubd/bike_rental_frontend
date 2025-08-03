@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import config from '../utils/config.js';
 
-const baseURL = import.meta.env.VITE_API_URL || "https://bike-rental-backend-jmhr.onrender.com/api/v1/";
+const baseURL = config.API_URL;
 
 const useFetch = (endpoint) => {
   const [data, setData] = useState(null);

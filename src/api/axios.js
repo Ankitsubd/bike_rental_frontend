@@ -3,12 +3,15 @@ import { jwtDecode } from 'jwt-decode';
 import dayjs from 'dayjs';
 import { refreshToken } from '../utils/tokenRefresh';
 
-// Debug: Log the API URL being used
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('Using API URL:', import.meta.env.VITE_API_URL || 'https://bike-rental-backend-jmhr.onrender.com/api/v1/');
+import config from '../utils/config.js';
+
+// Debug: Log the API URL being used (only in development)
+if (config.ENABLE_DEBUG) {
+  console.log('Using API URL:', config.API_URL);
+}
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://bike-rental-backend-jmhr.onrender.com/api/v1/',
+    baseURL: config.API_URL,
   // Remove default Content-Type to let it be set dynamically
 });
 

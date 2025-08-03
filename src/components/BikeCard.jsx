@@ -150,10 +150,10 @@ const BikeCard = ({ bike }) => {
             >
                 {/* Professional Image Section */}
                 <div className="relative overflow-hidden">
-                    {bike.image ? (
+                    {(bike.image || bike.image_url) ? (
                         <div className="relative">
                             <img 
-                                src={bike.image}
+                                src={bike.image_url || bike.image}
                                 alt={bike.name}
                                 className={`w-full h-48 sm:h-56 lg:h-64 object-cover transition-all duration-700 ${
                                     isHovered ? 'scale-110' : 'scale-100'

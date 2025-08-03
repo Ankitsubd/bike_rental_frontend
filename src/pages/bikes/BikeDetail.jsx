@@ -309,10 +309,10 @@ const BikeDetail = () => {
           <div className="xl:col-span-2 space-y-6">
             {/* Enhanced Bike Image */}
             <div className="relative group">
-              {bike.image ? (
+              {(bike.image || bike.image_url) ? (
                 <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img 
-                    src={bike.image}
+                    src={bike.image_url || bike.image}
                     alt={bike.name}
                     className="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                   />
