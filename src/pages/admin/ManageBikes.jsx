@@ -18,8 +18,11 @@ const ManageBikes = () => {
     bike_type: '',
     price_per_hour: '',
     description: '',
-    image: null
+    image: null,
+    imageUrl: ''
   });
+  
+  const [imageInputType, setImageInputType] = useState('file');
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -280,7 +283,10 @@ const ManageBikes = () => {
               }
               formData.append(key, form[key]);
             }
-          } else if (form[key] !== null && form[key] !== '') {
+          } else if (key === 'imageUrl' && form[key]) {
+            // Handle image URL
+            formData.append('image_url', form[key]);
+          } else if (form[key] !== null && form[key] !== '' && key !== 'imageUrl') {
             // Handle non-image fields
             formData.append(key, form[key]);
           }
@@ -294,10 +300,10 @@ const ManageBikes = () => {
           formData.append('phone_number', '');
         }
         
-        // Check if image is included
-        if (!formData.has('image')) {
+        // Check if image is included (either file or URL)
+        if (!formData.has('image') && !formData.has('image_url')) {
           console.error('No image found in FormData!');
-          throw new Error('Bike image is required. Please select an image file.');
+          throw new Error('Bike image is required. Please select an image file or enter an image URL.');
         }
         
         const response = await api.post('admin/bikes/', formData);
@@ -369,8 +375,10 @@ const ManageBikes = () => {
       bike_type: bike.bike_type || '',
       price_per_hour: bike.price_per_hour || '',
       description: bike.description || '',
-      image: null
+      image: null,
+      imageUrl: ''
     });
+    setImageInputType('file');
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -407,8 +415,10 @@ const ManageBikes = () => {
       bike_type: '',
       price_per_hour: '',
       description: '',
-      image: null
+      image: null,
+      imageUrl: ''
     });
+    setImageInputType('file');
     setEditingBike(null);
     setShowForm(false);
   };
@@ -416,7 +426,9 @@ const ManageBikes = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'image') {
-      setForm({ ...form, image: files[0] });
+      setForm({ ...form, image: files[0], imageUrl: '' });
+    } else if (name === 'imageUrl') {
+      setForm({ ...form, imageUrl: value, image: null });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -672,31 +684,109 @@ const ManageBikes = () => {
               </label>
               
               {/* Show current image if editing */}
-              {editingBike && bikes.find(bike => bike.id === editingBike.id)?.image && (
+              {editingBike && (bikes.find(bike => bike.id === editingBike.id)?.image || bikes.find(bike => bike.id === editingBike.id)?.image_url) && (
                 <div className="mb-3">
                   <p className="text-xs text-slate-600 mb-2">Current image:</p>
                   <img
-                    src={bikes.find(bike => bike.id === editingBike.id)?.image}
+                    src={bikes.find(bike => bike.id === editingBike.id)?.image_url || bikes.find(bike => bike.id === editingBike.id)?.image}
                     alt="Current bike image"
                     className="w-32 h-24 object-cover rounded-lg border border-slate-200"
                   />
                 </div>
               )}
-              
-              <input
-                type="file"
-                name="image"
-                onChange={handleChange}
-                accept="image/*"
-                required={!editingBike}
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 bg-white/80 backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                {editingBike 
-                  ? 'Leave empty to keep current image. JPG, PNG, GIF. Max size: 5MB'
-                  : 'Required: JPG, PNG, GIF. Max size: 5MB'
-                }
-              </p>
+
+              {/* Image Input Toggle */}
+              <div className="mb-3">
+                <div className="flex space-x-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setImageInputType('file')}
+                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
+                      imageInputType === 'file'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    Upload File
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageInputType('url')}
+                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
+                      imageInputType === 'url'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    Use URL
+                  </button>
+                </div>
+
+                {/* File Upload Input */}
+                {imageInputType === 'file' && (
+                  <div>
+                    <input
+                      type="file"
+                      name="image"
+                      onChange={handleChange}
+                      accept="image/*"
+                      required={!editingBike}
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 bg-white/80 backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      {editingBike 
+                        ? 'Leave empty to keep current image. JPG, PNG, GIF. Max size: 5MB'
+                        : 'Required: JPG, PNG, GIF. Max size: 5MB'
+                      }
+                    </p>
+                  </div>
+                )}
+
+                {/* URL Input */}
+                {imageInputType === 'url' && (
+                  <div>
+                    <input
+                      type="url"
+                      name="imageUrl"
+                      placeholder="https://example.com/image.jpg"
+                      value={form.imageUrl || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Enter a direct image URL (JPG, PNG, GIF)
+                    </p>
+                    
+                    {/* Quick URL Buttons */}
+                    <div className="mt-2">
+                      <p className="text-xs text-slate-600 mb-2">Quick URLs:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setForm({...form, imageUrl: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop'})}
+                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                        >
+                          Bike 1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setForm({...form, imageUrl: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa1?w=400&h=300&fit=crop'})}
+                          className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                        >
+                          Bike 2
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setForm({...form, imageUrl: 'https://images.unsplash.com/photo-1544191696-102dbdaeeaa1?w=400&h=300&fit=crop'})}
+                          className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                        >
+                          Bike 3
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -740,9 +830,9 @@ const ManageBikes = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBikes.map(bike => (
             <div key={bike.id} className="bg-gradient-to-br from-white to-slate-50/50 border border-slate-200/60 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              {bike.image && (
+              {(bike.image || bike.image_url) && (
                 <img
-                  src={bike.image}
+                  src={bike.image_url || bike.image}
                   alt={`${bike.brand} ${bike.model}`}
                   className="w-full h-48 object-cover rounded-xl mb-4 shadow-md"
                 />
