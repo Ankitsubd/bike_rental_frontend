@@ -121,10 +121,10 @@ const ManageBikes = () => {
     
     // Validate form for new bike creation
     if (!editingBike) {
-      if (!form.name || !form.brand || !form.model || !form.bike_type || !form.price_per_hour || !form.image) {
+      if (!form.name || !form.brand || !form.model || !form.bike_type || !form.price_per_hour) {
         setNotification({
           isVisible: true,
-          message: 'Please fill in all required fields (Name, Brand, Model, Bike Type, Price, and Bike Image)',
+          message: 'Please fill in all required fields (Name, Brand, Model, Bike Type, and Price)',
           type: 'error'
         });
         return;
@@ -140,32 +140,49 @@ const ManageBikes = () => {
         return;
       }
       
-      // Validate image is required for new bikes
-      if (!form.image || !(form.image instanceof File)) {
+      // Validate image is required for new bikes (either file or URL)
+      const hasImageFile = form.image && form.image instanceof File;
+      const hasImageUrl = form.imageUrl && form.imageUrl.trim() !== '';
+      
+      if (!hasImageFile && !hasImageUrl) {
         setNotification({
           isVisible: true,
-          message: 'Please select a bike image (required for new bikes)',
+          message: 'Please select a bike image file or enter an image URL (required for new bikes)',
           type: 'error'
         });
         return;
       }
       
-      // Validate image file
-      if (form.image.size > 5 * 1024 * 1024) {
-        setNotification({
-          isVisible: true,
-          message: 'Image file size must be less than 5MB',
-          type: 'error'
-        });
-        return;
+      // Validate image file if provided
+      if (hasImageFile) {
+        if (form.image.size > 5 * 1024 * 1024) {
+          setNotification({
+            isVisible: true,
+            message: 'Image file size must be less than 5MB',
+            type: 'error'
+          });
+          return;
+        }
+        if (!form.image.type.startsWith('image/')) {
+          setNotification({
+            isVisible: true,
+            message: 'Please select a valid image file (JPG, PNG, GIF)',
+            type: 'error'
+          });
+          return;
+        }
       }
-      if (!form.image.type.startsWith('image/')) {
-        setNotification({
-          isVisible: true,
-          message: 'Please select a valid image file (JPG, PNG, GIF)',
-          type: 'error'
-        });
-        return;
+      
+      // Validate image URL if provided
+      if (hasImageUrl) {
+        if (!form.imageUrl.startsWith('http://') && !form.imageUrl.startsWith('https://')) {
+          setNotification({
+            isVisible: true,
+            message: 'Please enter a valid image URL starting with http:// or https://',
+            type: 'error'
+          });
+          return;
+        }
       }
     } else {
       // Validate form for bike updates
@@ -207,6 +224,18 @@ const ManageBikes = () => {
           return;
         }
       }
+      
+      // Validate image URL if provided for updates
+      if (form.imageUrl && form.imageUrl.trim() !== '') {
+        if (!form.imageUrl.startsWith('http://') && !form.imageUrl.startsWith('https://')) {
+          setNotification({
+            isVisible: true,
+            message: 'Please enter a valid image URL starting with http:// or https://',
+            type: 'error'
+          });
+          return;
+        }
+      }
     }
     
     setIsSubmitting(true);
@@ -220,20 +249,19 @@ const ManageBikes = () => {
           
           // Add all form fields to FormData
           Object.keys(form).forEach(key => {
-            if (form[key] !== null && form[key] !== '') {
-              if (key === 'image' && form[key] instanceof File) {
-                formData.append(key, form[key]);
-              } else if (key !== 'image') {
+            if (key === 'image') {
+              // Handle image field specifically
+              if (form[key] instanceof File) {
                 formData.append(key, form[key]);
               }
+            } else if (key === 'imageUrl' && form[key]) {
+              // Handle image URL
+              formData.append('image_url', form[key]);
+            } else if (form[key] !== null && form[key] !== '' && key !== 'imageUrl') {
+              // Handle non-image fields
+              formData.append(key, form[key]);
             }
           });
-          
-          // Smart image handling: only include image if a new one is selected
-          if (form.image && form.image instanceof File) {
-            formData.append('image', form.image);
-          }
-          // If no new image, don't include image field - backend will keep old image
           
           const response = await api.put(`admin/bikes/${editingBike.id}/`, formData);
           console.log('Update response:', response);
