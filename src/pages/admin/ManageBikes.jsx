@@ -3,6 +3,7 @@ import api from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import SuccessNotification from '../../components/SuccessNotification';
+import { getImageUrl } from '../../utils/imageHelper';
 
 const ManageBikes = () => {
   const [bikes, setBikes] = useState([]);
@@ -716,7 +717,7 @@ const ManageBikes = () => {
                 <div className="mb-3">
                   <p className="text-xs text-slate-600 mb-2">Current image:</p>
                   <img
-                    src={bikes.find(bike => bike.id === editingBike.id)?.image_url || (bikes.find(bike => bike.id === editingBike.id)?.image?.url || bikes.find(bike => bike.id === editingBike.id)?.image)}
+                    src={getImageUrl(bikes.find(bike => bike.id === editingBike.id))}
                     alt="Current bike image"
                     className="w-32 h-24 object-cover rounded-lg border border-slate-200"
                   />

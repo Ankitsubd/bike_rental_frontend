@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../api/axios';
+import { getImageUrl } from '../utils/imageHelper';
 import { FaBicycle, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaMapMarkerAlt, FaHeart, FaCheckCircle } from 'react-icons/fa';
 
 const Home = () => {
@@ -283,7 +284,7 @@ const Home = () => {
                   {(bike.image || bike.image_url) && (
                     <div className="relative h-56 overflow-hidden">
                       <img
-                        src={bike.image_url || (bike.image?.url || bike.image)}
+                        src={getImageUrl(bike)}
                         alt={bike.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />

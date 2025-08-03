@@ -5,6 +5,7 @@ import useBike from '../../hooks/useBike';
 import api from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { getImageUrl } from '../../utils/imageHelper';
 import { FaCheckCircle, FaClock, FaBicycle, FaStar, FaArrowLeft, FaInfoCircle, FaCog, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt, FaDollarSign, FaComments, FaShieldAlt, FaHeart, FaShare, FaBookmark } from 'react-icons/fa';
 
 const BikeDetail = () => {
@@ -312,7 +313,7 @@ const BikeDetail = () => {
               {(bike.image || bike.image_url) ? (
                 <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img 
-                    src={bike.image_url || (bike.image?.url || bike.image)}
+                    src={getImageUrl(bike)}
                     alt={bike.name}
                     className="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                   />
