@@ -26,6 +26,7 @@ import {
 const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }) => {
   const [inputValue, setInputValue] = useState(initialValue || '');
   const inputRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     if (initialValue !== inputValue) {
@@ -33,11 +34,25 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
     }
   }, [initialValue, inputValue]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const debouncedSearch = useCallback((value) => {
-    const timeoutId = setTimeout(() => {
+    // Clear previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
       onSearch(value);
-    }, 500);
-    return () => clearTimeout(timeoutId);
+    }, 300);
   }, [onSearch]);
 
   const handleChange = (e) => {
@@ -47,6 +62,10 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
   };
 
   const handleClear = () => {
+    // Clear timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     setInputValue('');
     onSearch('');
     inputRef.current?.focus();
@@ -270,10 +289,10 @@ const BikeList = () => {
   const [error, setError] = useState('');
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [typeFilter, setTypeFilter] = useState(searchParams.get('type') || '');
-  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
-  const [sortBy, setSortBy] = useState(searchParams.get('sort') || '');
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
+  const [typeFilter, setTypeFilter] = useState(() => searchParams.get('type') || '');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || '');
+  const [sortBy, setSortBy] = useState(() => searchParams.get('sort') || '');
 
   const fetchData = async () => {
     try {
@@ -390,6 +409,7 @@ const BikeList = () => {
     };
   }, [currentPage, searchTerm, typeFilter, statusFilter, sortBy]);
 
+  // Sync URL params with state
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
@@ -398,6 +418,19 @@ const BikeList = () => {
     if (sortBy) params.set('sort', sortBy);
     setSearchParams(params);
   }, [searchTerm, typeFilter, statusFilter, sortBy, setSearchParams]);
+
+  // Sync state with URL params when they change externally
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    const urlType = searchParams.get('type') || '';
+    const urlStatus = searchParams.get('status') || '';
+    const urlSort = searchParams.get('sort') || '';
+    
+    if (urlSearch !== searchTerm) setSearchTerm(urlSearch);
+    if (urlType !== typeFilter) setTypeFilter(urlType);
+    if (urlStatus !== statusFilter) setStatusFilter(urlStatus);
+    if (urlSort !== sortBy) setSortBy(urlSort);
+  }, [searchParams, searchTerm, typeFilter, statusFilter, sortBy]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
@@ -488,6 +521,7 @@ const BikeList = () => {
           {/* Enhanced Search Bar */}
           <div className="max-w-3xl mx-auto mb-8">
             <SearchInput 
+              key={searchTerm} // Force re-render when search term changes
               initialValue={searchTerm}
               onSearch={handleSearch}
               placeholder="Search by name, brand, type, or features..."

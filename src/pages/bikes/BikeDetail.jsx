@@ -312,7 +312,7 @@ const BikeDetail = () => {
               {(bike.image || bike.image_url) ? (
                 <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img 
-                    src={bike.image_url || bike.image}
+                    src={bike.image_url || (bike.image?.url || bike.image)}
                     alt={bike.name}
                     className="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
                   />

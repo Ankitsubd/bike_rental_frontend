@@ -153,7 +153,7 @@ const BikeCard = ({ bike }) => {
                     {(bike.image || bike.image_url) ? (
                         <div className="relative">
                             <img 
-                                src={bike.image_url || bike.image}
+                                src={bike.image_url || (bike.image?.url || bike.image)}
                                 alt={bike.name}
                                 className={`w-full h-48 sm:h-56 lg:h-64 object-cover transition-all duration-700 ${
                                     isHovered ? 'scale-110' : 'scale-100'

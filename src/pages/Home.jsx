@@ -283,7 +283,7 @@ const Home = () => {
                   {(bike.image || bike.image_url) && (
                     <div className="relative h-56 overflow-hidden">
                       <img
-                        src={bike.image_url || bike.image}
+                        src={bike.image_url || (bike.image?.url || bike.image)}
                         alt={bike.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
