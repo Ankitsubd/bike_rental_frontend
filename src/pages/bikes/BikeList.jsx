@@ -96,7 +96,7 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
   );
 };
 
-// Clean Filter component
+// Clean Filter component with dropdowns
 const FilterSection = ({ typeFilter, statusFilter, sortBy, onFilterChange, onClearFilters, hasActiveFilters }) => {
   const bikeTypes = [
     { value: "", label: "All Types", icon: <FaBicycle className="w-4 h-4" /> },
@@ -144,66 +144,72 @@ const FilterSection = ({ typeFilter, statusFilter, sortBy, onFilterChange, onCle
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Bike Type Filter */}
+        {/* Bike Type Filter Dropdown */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-3">Bike Type</label>
-          <div className="space-y-2">
-            {bikeTypes.map((type) => (
-              <button
-                key={type.value}
-                onClick={() => onFilterChange('type', type.value)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
-                  typeFilter === type.value
-                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
-                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {type.icon}
-                <span className="font-medium">{type.label}</span>
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              value={typeFilter}
+              onChange={(e) => onFilterChange('type', e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white text-gray-700 appearance-none cursor-pointer hover:border-gray-300"
+            >
+              {bikeTypes.map((type) => (
+                <option key={type.value} value={type.value} className="flex items-center space-x-3 py-2">
+                  {type.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
 
-        {/* Status Filter */}
+        {/* Status Filter Dropdown */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-3">Status</label>
-          <div className="space-y-2">
-            {statusOptions.map((status) => (
-              <button
-                key={status.value}
-                onClick={() => onFilterChange('status', status.value)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
-                  statusFilter === status.value
-                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
-                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {status.icon}
-                <span className="font-medium">{status.label}</span>
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => onFilterChange('status', e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white text-gray-700 appearance-none cursor-pointer hover:border-gray-300"
+            >
+              {statusOptions.map((status) => (
+                <option key={status.value} value={status.value} className="flex items-center space-x-3 py-2">
+                  {status.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
 
-        {/* Sort Options */}
+        {/* Sort Options Dropdown */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-3">Sort By</label>
-          <div className="space-y-2">
-            {sortOptions.map((sort) => (
-              <button
-                key={sort.value}
-                onClick={() => onFilterChange('sort', sort.value)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
-                  sortBy === sort.value
-                    ? 'bg-blue-100 border-2 border-blue-500 text-blue-700'
-                    : 'bg-gray-50 border-2 border-transparent text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <FaSort className="w-4 h-4" />
-                <span className="font-medium">{sort.label}</span>
-              </button>
-            ))}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => onFilterChange('sort', e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white text-gray-700 appearance-none cursor-pointer hover:border-gray-300"
+            >
+              {sortOptions.map((sort) => (
+                <option key={sort.value} value={sort.value} className="flex items-center space-x-3 py-2">
+                  {sort.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
