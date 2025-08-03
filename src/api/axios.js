@@ -5,10 +5,10 @@ import { refreshToken } from '../utils/tokenRefresh';
 
 // Debug: Log the API URL being used
 console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-console.log('Using API URL:', import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1/');
+console.log('Using API URL:', import.meta.env.VITE_API_URL || 'https://bike-rental-backend-jmhr.onrender.com/api/v1/');
 
 const api = axios.create({
-    baseURL: 'https://bike-rental-backend-jmhr.onrender.com/api/v1/',
+    baseURL: import.meta.env.VITE_API_URL || 'https://bike-rental-backend-jmhr.onrender.com/api/v1/',
   // Remove default Content-Type to let it be set dynamically
 });
 

@@ -9,7 +9,8 @@ export const refreshToken = async () => {
 
   try {
     console.log('Attempting to refresh token...');
-    const response = await axios.post('http://127.0.0.1:8000/api/v1/token/refresh/', { refresh });
+    // Use the same production URL as the main axios instance
+    const response = await axios.post('https://bike-rental-backend-jmhr.onrender.com/api/v1/token/refresh/', { refresh });
     console.log('Token refresh successful');
     localStorage.setItem('accessToken', response.data.access);
     return response.data.access;

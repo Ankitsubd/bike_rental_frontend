@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const baseURL = "http://127.0.0.1:8000/api/v1/";
+const baseURL = import.meta.env.VITE_API_URL || "https://bike-rental-backend-jmhr.onrender.com/api/v1/";
 
 const useFetch = (endpoint) => {
   const [data, setData] = useState(null);
