@@ -28,11 +28,10 @@ const SearchInput = ({ initialValue, onSearch, placeholder = "Search bikes..." }
   const inputRef = useRef(null);
   const timeoutRef = useRef(null);
 
+  // Sync with external value changes
   useEffect(() => {
-    if (initialValue !== inputValue) {
-      setInputValue(initialValue || '');
-    }
-  }, [initialValue, inputValue]);
+    setInputValue(initialValue || '');
+  }, [initialValue]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -304,7 +303,10 @@ const BikeList = () => {
       if (sortBy) params.append('ordering', sortBy);
       params.append('page', currentPage);
 
+      console.log('🔍 Fetching bikes with params:', params.toString());
       const response = await api.get(`bikes/?${params.toString()}`);
+      console.log('📦 Response:', response.data);
+      
       setBikes(response.data.results || response.data);
       setTotalPages(Math.ceil((response.data.count || response.data.length) / 12));
       setError('');
@@ -315,6 +317,33 @@ const BikeList = () => {
       setLoading(false);
     }
   };
+
+  // Sync URL parameters with state
+  useEffect(() => {
+    const search = searchParams.get('search') || '';
+    const type = searchParams.get('type') || '';
+    const status = searchParams.get('status') || '';
+    const sort = searchParams.get('sort') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+
+    if (search !== searchTerm) setSearchTerm(search);
+    if (type !== typeFilter) setTypeFilter(type);
+    if (status !== statusFilter) setStatusFilter(status);
+    if (sort !== sortBy) setSortBy(sort);
+    if (page !== currentPage) setCurrentPage(page);
+  }, [searchParams, searchTerm, typeFilter, statusFilter, sortBy, currentPage]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (typeFilter) params.set('type', typeFilter);
+    if (statusFilter) params.set('status', statusFilter);
+    if (sortBy) params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', currentPage.toString());
+    
+    setSearchParams(params);
+  }, [searchTerm, typeFilter, statusFilter, sortBy, currentPage, setSearchParams]);
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -433,11 +462,13 @@ const BikeList = () => {
   }, [searchParams, searchTerm, typeFilter, statusFilter, sortBy]);
 
   const handleSearch = (value) => {
+    console.log('🔍 Search term changed:', value);
     setSearchTerm(value);
     setCurrentPage(1);
   };
 
   const handleFilterChange = (filterType, value) => {
+    console.log('🎛️ Filter changed:', filterType, value);
     switch (filterType) {
       case 'type':
         setTypeFilter(value);
